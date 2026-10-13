@@ -6,23 +6,24 @@
 # GET /requests/{req_id} (returns one request by ID)
 
 
-from fastapi import FastAPI, HTTPException, status
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, HTTPException, Query, status
+from pydantic import BaseModel, EmailStr, Field
 
 app = FastAPI(title="Flowpilot API")
 
-# shaping the income request data
+# Data the client must provide when creating a request
 class RequestCreate(BaseModel):
     name: str = Field(min_length=1)
-    email: str = Field(min_length=1)
+    email: EmailStr
     message: str = Field(min_length=1)
 
 
-# shape of saved request
+# Data returned to the client, including the generated ID
 class RequestItem(RequestCreate):
     id: int
 
 
+# Temporary in-memory storage
 requests_db: dict[int, RequestItem] = {}
 next_id = 1
 
@@ -33,29 +34,31 @@ def health_check():
 
 
 @app.get("/requests", response_model=list[RequestItem])
-def get_requests(limit: int = 10):
+def get_requests(
+    limit: int = Query(default=10, ge=1, le=100)
+):
     return list(requests_db.values())[:limit]
 
 
 @app.post(
     "/requests",
     response_model=RequestItem,
-    status_code=status.HTTP_201_CREATED
+    status_code=status.HTTP_201_CREATED,
 )
 def create_request(request: RequestCreate):
     global next_id
 
-    new_req = RequestItem(
-        id = next_id,
-        name = request.name,
-        email = request.email,
-        message = request.message
+    new_request = RequestItem(
+        id=next_id,
+        name=request.name,
+        email=request.email,
+        message=request.message,
     )
 
-    requests_db[next_id] = new_req
+    requests_db[next_id] = new_request
     next_id += 1
 
-    return new_req
+    return new_request
 
 
 @app.get("/requests/{request_id}", response_model=RequestItem)
