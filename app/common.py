@@ -49,3 +49,18 @@ def create_request(request: RequestCreate):
     next_id += 1
 
     return new_request
+
+
+
+# endpoint 4
+@app.get("/requests/{request_id}", response_model=RequestItem)
+def get_request(request_id: int):
+    request = temp_db.get(request_id)
+
+    if request is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Request Not Found"
+        )
+
+    return request
