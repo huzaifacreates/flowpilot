@@ -1,7 +1,7 @@
 from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database import Base
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from datetime import datetime
 
 class RequestCreate(BaseModel):
@@ -10,6 +10,7 @@ class RequestCreate(BaseModel):
     message: str = Field(min_length=1)
 
 class RequestItem(RequestCreate):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     status: str = "open"
     created_at: datetime
@@ -28,4 +29,3 @@ class Request(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    
