@@ -1,3 +1,6 @@
+from sqlalchemy import DateTime, String, func
+from sqlalchemy.orm import Mapped, mapped_column
+from app.database import Base
 from pydantic import BaseModel, EmailStr, Field
 from datetime import datetime
 
@@ -13,3 +16,16 @@ class RequestItem(RequestCreate):
 
 class RequestResponse(RequestItem):
     pass
+
+class Request(Base):
+    __tablename__ = "requests"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String)
+    email: Mapped[str] = mapped_column(String)
+    message: Mapped[str] = mapped_column(String)
+    status: Mapped[str] = mapped_column(String, default="open")
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now()
+    )
+    
