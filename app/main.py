@@ -6,12 +6,16 @@
 # GET /requests/{req_id} (returns one request by ID)
 
 
+from app.database import Base, engine
+from app import models
 from fastapi import FastAPI, HTTPException, Query, status
 from app.models import RequestCreate, RequestItem, RequestResponse
 from datetime import datetime, timezone
 
 
+
 app = FastAPI(title="Flowpilot API")
+Base.metadata.create_all(bind=engine)
 
 # Temporary in-memory storage
 requests_db: dict[int, RequestItem] = {}
